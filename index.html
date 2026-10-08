@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AskBudget — self-hosted household finance with an MCP endpoint</title>
+    <meta name="description" content="AskBudget turns bank and brokerage statements into dashboards, a transaction table, holdings and an MCP endpoint for AI agents. Self-hosted, local-first, under active development.">
+    <meta name="theme-color" content="#07090d">
+    <meta property="og:title" content="AskBudget">
+    <meta property="og:description" content="Your household's money, understood — on hardware you control. Statements in, answers out, and an MCP endpoint your AI agent can ask.">
+    <meta property="og:url" content="https://askbudget.app/">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <script type="module" src="/flow.js"></script>
+</head>
+<body>
+
+<!-- Icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+        <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></symbol>
+        <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 21h18M5 21V10m4 11V10m6 11V10m4 11V10M2 10l10-6 10 6z"/></symbol>
+        <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.8-9.8M17 6l3 3M14.5 8.5l2 2"/></symbol>
+        <symbol id="i-coins" viewBox="0 0 24 24"><circle cx="8" cy="8" r="6"/><path d="M18.1 10.4A6 6 0 1 1 10.3 18M7 6h1v4"/><path d="m16.7 13.9.7.7-2.8 2.8"/></symbol>
+        <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/></symbol>
+        <symbol id="i-dash" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+        <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+        <symbol id="i-pie" viewBox="0 0 24 24"><path d="M21.2 15.9A10 10 0 1 1 8 2.8"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></symbol>
+        <symbol id="i-plug" viewBox="0 0 24 24"><path d="M12 22v-5M9 8V2M15 8V2M18 8v5a6 6 0 0 1-12 0V8z"/></symbol>
+        <symbol id="i-bot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2.5"/><path d="M12 8V4M8 4h8M9 13v2M15 13v2M2 14h2M20 14h2"/></symbol>
+        <symbol id="i-terminal" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="16" rx="2.5"/><path d="m7 10 3 2.5L7 15M12.5 15H17"/></symbol>
+        <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/></symbol>
+        <symbol id="i-arrows" viewBox="0 0 24 24"><path d="M7 7h13l-4-4M17 17H4l4 4"/></symbol>
+        <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+        <symbol id="i-tag" viewBox="0 0 24 24"><path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4z"/><circle cx="7.5" cy="7.5" r="1.2"/></symbol>
+        <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 12 10 5 10-5M2 17l10 5 10-5"/></symbol>
+        <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-3.6 8-10V5l-8-3-8 3v7c0 6.4 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
+        <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></symbol>
+        <symbol id="i-apple" viewBox="0 0 24 24"><path d="M12 7c-1-1.5-2.5-2-4-1.8C5.5 5.5 4 7.6 4 10.5 4 15 7 20 9 20c1 0 1.7-.6 3-.6s2 .6 3 .6c2 0 5-5 5-9.5 0-2.9-1.5-5-4-5.3C14.5 5 13 5.5 12 7z"/><path d="M12 7c0-2 1-3.5 3-4"/></symbol>
+        <symbol id="i-windows" viewBox="0 0 24 24"><path d="M3 5.5 10.5 4.5v7H3zM13 4.2 21 3v8.5h-8zM3 12.5h7.5v7L3 18.5zM13 12.5h8V21l-8-1.2z"/></symbol>
+        <symbol id="i-linux" viewBox="0 0 24 24"><path d="M12 3c-2.2 0-3.5 1.8-3.5 4.5 0 1.5.4 2.3-.6 4C6.6 13.6 5 15.7 5 18c0 1.7 1.2 3 3 3h8c1.8 0 3-1.3 3-3 0-2.3-1.6-4.4-2.9-6.5-1-1.7-.6-2.5-.6-4C15.5 4.8 14.2 3 12 3z"/><path d="M10.5 8h.01M13.5 8h.01M11 10.5h2"/></symbol>
+        <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></symbol>
+        <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+        <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+        <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+    </defs>
+</svg>
+
+<!-- Calm animated background -->
+<div class="backdrop" aria-hidden="true">
+    <div class="aurora aurora-1"></div>
+    <div class="aurora aurora-2"></div>
+    <div class="aurora aurora-3"></div>
+    <div class="grid-dots"></div>
+    <div class="vignette"></div>
+</div>
+
+<!--<div class="dev-banner" role="note">-->
+<!--    <span class="pulse-dot"></span>-->
+<!--    AskBudget is under active development. No stable release yet — the Docker image is an <strong>alpha</strong>.-->
+<!--</div>-->
+
+<header class="nav">
+    <div class="container nav-inner">
+        <a class="brand" href="#top" aria-label="AskBudget home">
+            <img src="/favicon.svg" alt="" width="28" height="28">
+            <span class="brand-name"><span class="gradient-text">ask</span>budget</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+            <a href="#how">How it works</a>
+            <a href="#features">Features</a>
+            <a href="#get-started">Get started</a>
+        </nav>
+        <a class="btn btn-small btn-ghost" href="https://demo.askbudget.app" rel="noopener">
+            Live demo <svg class="icon"><use href="#i-arrow"/></svg>
+        </a>
+    </div>
+</header>
+
+<main id="top">
+
+    <!-- Hero: headline, then the diagram as the hero visual -->
+    <section class="hero container">
+        <a class="eyebrow reveal" href="#status">
+            <span class="tag tag-amber">Alpha</span>
+            <span>Under active development<span class="hide-sm"> · v0.1.0-rc.2</span></span>
+            <svg class="icon"><use href="#i-arrow"/></svg>
+        </a>
+        <h1 class="reveal">
+            Statements in. <span class="gradient-text">Answers out.</span>
+        </h1>
+        <p class="lead reveal">
+            Self-hosted budgeting for households. AskBudget turns bank, brokerage and exchange data into
+            dashboards, a transaction table, holdings — and an MCP endpoint your AI agent can ask.
+        </p>
+        <div class="hero-cta reveal">
+            <a class="btn btn-primary" href="https://demo.askbudget.app" rel="noopener">
+                Try the live demo <svg class="icon"><use href="#i-arrow"/></svg>
+            </a>
+            <a class="btn btn-ghost" href="#get-started">
+                <svg class="icon"><use href="#i-box"/></svg> Run the alpha with Docker
+            </a>
+        </div>
+    </section>
+
+    <section id="how" class="flow-section container" aria-label="How AskBudget works">
+        <div class="flow-canvas reveal" id="flow">
+            <svg class="flow-edges" id="flow-edges" aria-hidden="true"></svg>
+            <div class="flow-labels" id="flow-labels" aria-hidden="true"></div>
+
+            <div class="flow-grid">
+                <div class="flow-group" id="g-in" data-tone="blue">
+                    <div class="group-label">Incoming data</div>
+                    <div class="node node-info" id="n-broker" role="button" tabindex="0" aria-pressed="false" aria-controls="flow-detail"><span class="node-ic"><svg><use href="#i-file"/></svg></span><span>Brokerage statements</span></div>
+                    <div class="node node-info" id="n-bank" role="button" tabindex="0" aria-pressed="false" aria-controls="flow-detail"><span class="node-ic"><svg><use href="#i-bank"/></svg></span><span>Bank statements</span></div>
+                    <div class="node node-info" id="n-t212" role="button" tabindex="0" aria-pressed="false" aria-controls="flow-detail"><span class="node-ic"><svg><use href="#i-key"/></svg></span><span>Trading 212</span></div>
+                    <div class="node node-info" id="n-crypto" role="button" tabindex="0" aria-pressed="false" aria-controls="flow-detail"><span class="node-ic"><svg><use href="#i-coins"/></svg></span><span>Binance, Coinbase, …</span></div>
+                    <div class="node node-info" id="n-ofin" role="button" tabindex="0" aria-pressed="false" aria-controls="flow-detail"><span class="node-ic"><svg><use href="#i-globe"/></svg></span><span>Other banks <small>Revolut, Swedbank</small></span></div>
+                </div>
+
+                <div class="flow-center">
+                    <div class="node node-app" id="n-app">
+                        <div class="app-ring" aria-hidden="true"></div>
+                        <img src="/favicon.svg" alt="" width="40" height="40">
+                        <strong>AskBudget</strong>
+                        <span>import · classify · reconcile</span>
+                        <div class="app-meta"><code>SQLite</code><code>one binary</code></div>
+                    </div>
+                </div>
+
+                <div class="flow-group" id="g-out" data-tone="violet">
+                    <div class="group-label">Outgoing</div>
+                    <div class="node" id="n-dash"><span class="node-ic"><svg><use href="#i-dash"/></svg></span><span>Dashboards</span></div>
+                    <div class="node" id="n-tx"><span class="node-ic"><svg><use href="#i-list"/></svg></span><span>Transactions view</span></div>
+                    <div class="node" id="n-hold"><span class="node-ic"><svg><use href="#i-pie"/></svg></span><span>Holdings view</span></div>
+                    <div class="node node-mcp" id="n-mcp"><span class="node-ic"><svg><use href="#i-plug"/></svg></span><span>MCP endpoint</span></div>
+                </div>
+
+                <div class="flow-group" id="g-agent" data-tone="green">
+                    <div class="group-label">Agents</div>
+                    <div class="node" id="n-cd"><span class="node-ic"><svg><use href="#i-spark"/></svg></span><span>Claude Desktop</span></div>
+                    <div class="node" id="n-cc"><span class="node-ic"><svg><use href="#i-terminal"/></svg></span><span>Claude Code</span></div>
+                    <div class="node" id="n-llm"><span class="node-ic"><svg><use href="#i-bot"/></svg></span><span>Other LLM agents</span></div>
+                </div>
+
+                <aside class="flow-detail" id="flow-detail" aria-live="polite"></aside>
+            </div>
+        </div>
+        <p class="flow-caption reveal">
+            <span><svg class="icon"><use href="#i-shield"/></svg> One local SQLite database</span>
+            <span><svg class="icon"><use href="#i-layers"/></svg> Every view reads the same reconciled data</span>
+            <span><svg class="icon"><use href="#i-plug"/></svg> Read-only, token-protected MCP</span>
+        </p>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="container features">
+        <div class="section-head section-head-split reveal">
+            <div>
+                <span class="kicker">Why AskBudget</span>
+                <h2>Built to tell the truth about money.</h2>
+            </div>
+            <p>Summed naively, bank statements make a household look like it earns and spends twice what it does. AskBudget works out what each transaction actually was.</p>
+        </div>
+
+        <div class="feature-grid">
+            <article class="card reveal">
+                <span class="card-ic"><svg><use href="#i-arrows"/></svg></span>
+                <h3>Transfers are not spending</h3>
+                <p>Topping up Revolut from a Swedbank card shows up twice. AskBudget pairs both legs and leaves them out of income and spending.</p>
+            </article>
+            <article class="card reveal">
+                <span class="card-ic"><svg><use href="#i-undo"/></svg></span>
+                <h3>A refund is not income</h3>
+                <p>A returned jacket is folded back into the purchase it undid — not counted once as spending and once as earnings.</p>
+            </article>
+            <article class="card reveal">
+                <span class="card-ic"><svg><use href="#i-tag"/></svg></span>
+                <h3>Categories where banks give none</h3>
+                <p>Rules derive merchant, category and recurrence — even for banks that export no category at all.</p>
+            </article>
+            <article class="card reveal">
+                <span class="card-ic"><svg><use href="#i-layers"/></svg></span>
+                <h3>Every row has a flow</h3>
+                <p>Income, spending, savings, internal or perimeter. Only real spending counts against income, so the dashboard answers “are we all right?”</p>
+            </article>
+            <article class="card reveal">
+                <span class="card-ic"><svg><use href="#i-pie"/></svg></span>
+                <h3>The whole household’s wealth</h3>
+                <p>Multiple banks, multiple people, brokerage holdings and crypto exchanges via CCXT — one net-worth view.</p>
+            </article>
+            <article class="card reveal">
+                <span class="card-ic"><svg><use href="#i-plug"/></svg></span>
+                <h3>Ask your agent</h3>
+                <p>A read-only, token-protected MCP endpoint lets Claude and other agents answer questions about your finances.</p>
+            </article>
+            <article class="card reveal">
+                <span class="card-ic"><svg><use href="#i-shield"/></svg></span>
+                <h3>Private by design</h3>
+                <p>Local-first and offline-capable. Your statements live in a SQLite file on hardware you control — not with a SaaS provider.</p>
+            </article>
+            <article class="card reveal">
+                <span class="card-ic"><svg><use href="#i-box"/></svg></span>
+                <h3>One binary, one container</h3>
+                <p>No Redis, no separate frontend and backend. A single executable on a distroless image with no shell.</p>
+            </article>
+        </div>
+    </section>
+
+    <!-- Get started -->
+    <section id="get-started" class="container get-started">
+        <div class="section-head reveal">
+            <span class="kicker">Get started</span>
+            <h2>Try it today. Install it soon.</h2>
+            <p>The live demo is the fastest way to look around. If you are comfortable with early software, the alpha Docker image is available now.</p>
+        </div>
+
+        <div class="install-grid">
+            <article class="card install-card reveal">
+                <div class="install-head">
+                    <span class="card-ic"><svg><use href="#i-box"/></svg></span>
+                    <div>
+                        <h3>Docker image <span class="tag tag-amber">Alpha</span></h3>
+                        <p class="muted"><code>linux/amd64</code> · <code>linux/arm64</code></p>
+                    </div>
+                </div>
+
+                <div class="code-block">
+                    <button class="copy-btn" type="button" data-copy="docker-cmd" aria-label="Copy command">
+                        <svg class="icon i-copy"><use href="#i-copy"/></svg>
+                        <svg class="icon i-check"><use href="#i-check"/></svg>
+                    </button>
+<pre id="docker-cmd"><code><span class="c-cmd">docker run</span> -d --name askbudget \
+  -p 127.0.0.1:47100:47100 \
+  -v askbudget-data:/data \
+  <span class="c-str">ghcr.io/rimvydasb/askbudget:0.1.0-rc.2</span></code></pre>
+                </div>
+
+                <div class="callout">
+                    <svg class="icon"><use href="#i-alert"/></svg>
+                    <p><strong>Alpha software.</strong> Expect bugs and breaking changes, and back up the <code>/data</code> volume. There is no login yet — publish the port on <code>127.0.0.1</code> or a trusted network only.</p>
+                </div>
+
+                <a class="btn btn-ghost btn-block" href="https://github.com/rimvydasb/askbudget/pkgs/container/askbudget" rel="noopener">
+                    View image on GitHub Container Registry <svg class="icon"><use href="#i-ext"/></svg>
+                </a>
+            </article>
+
+            <article class="card install-card reveal">
+                <div class="install-head">
+                    <span class="card-ic"><svg><use href="#i-dash"/></svg></span>
+                    <div>
+                        <h3>Desktop apps <span class="tag tag-muted">Coming soon</span></h3>
+                        <p class="muted">Native downloads arrive with the first stable release.</p>
+                    </div>
+                </div>
+
+                <div class="download-list">
+                    <span class="btn btn-disabled btn-block" aria-disabled="true">
+                        <svg class="icon"><use href="#i-apple"/></svg> Download for macOS <span class="soon">Soon</span>
+                    </span>
+                    <span class="btn btn-disabled btn-block" aria-disabled="true">
+                        <svg class="icon"><use href="#i-windows"/></svg> Download for Windows <span class="soon">Soon</span>
+                    </span>
+                    <span class="btn btn-disabled btn-block" aria-disabled="true">
+                        <svg class="icon"><use href="#i-linux"/></svg> Download for Linux <span class="soon">Soon</span>
+                    </span>
+                </div>
+
+                <a class="btn btn-primary btn-block" href="https://demo.askbudget.app" rel="noopener">
+                    Meanwhile, try the live demo <svg class="icon"><use href="#i-arrow"/></svg>
+                </a>
+            </article>
+        </div>
+    </section>
+
+    <!-- Status -->
+    <section id="status" class="container status reveal">
+        <div class="status-card">
+            <span class="pulse-dot"></span>
+            <div>
+                <h2>Project status: under active development</h2>
+                <p>AskBudget has no stable release yet. The current build is <code>0.1.0-rc.2</code> — an alpha for early testers. Features, the database schema and the MCP tools may still change between versions.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="container footer-inner">
+        <div class="brand">
+            <img src="/favicon.svg" alt="" width="22" height="22">
+            <span>AskBudget</span>
+        </div>
+        <p class="muted">© 2026 AskBudget · Self-hosted household finance · Not financial advice.</p>
+        <nav class="footer-links" aria-label="Footer">
+            <a href="https://demo.askbudget.app" rel="noopener">Demo</a>
+            <a href="https://github.com/rimvydasb/askbudget/pkgs/container/askbudget" rel="noopener">Docker image</a>
+        </nav>
+    </div>
+</footer>
+
+</body>
+</html>

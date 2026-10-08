@@ -2,11 +2,10 @@ name = "askbudget"
 main = "index.js"
 compatibility_date = "2026-10-01"
 workers_dev = false
+routes = [
+  { pattern = "askbudget.app", custom_domain = true },
+]
 
 [[r2_buckets]]
 binding = "BUCKET"
 bucket_name = "askbudget"
-
-routes = [
-  { pattern = "askbudget.app", custom_domain = true },
-]

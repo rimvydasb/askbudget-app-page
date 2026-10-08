@@ -29,6 +29,8 @@ Hashed files in `assets/` get a one-year cache; `index.html` and the rest get fi
 | `CLOUDFLARE_ACCOUNT_ID`           | Variable | Optional; defaults to `b116b937f135479a90e8918fa9612552`     |
 
 The deploy job runs in the `production` environment, so the secret and variables can live there or at repository level.
+`worker/` holds a Worker that serves the bucket on askbudget.app and maps `/` to `index.html`, because R2 has no index document. The deploy job also publishes it. Before the first Worker deploy, remove the R2 custom domain for `askbudget.app` (R2 → bucket → Settings), since the Worker takes over that hostname. The API token also needs **Workers Scripts: Edit**.
+
 A manual deploy: `CLOUDFLARE_API_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… R2_BUCKET=… npm run deploy`.
 
 When a release ships, update the version (`0.1.0-rc.2`) and replace the disabled download buttons in `#get-started`.

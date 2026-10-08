@@ -55,7 +55,10 @@
 
         function build() {
             mode = stackedQuery.matches ? 'stacked' : 'wide';
-            var spec = mode === 'stacked' ? STACKED_EDGES : WIDE_EDGES;
+            // Edges to or from a box the explanation panel has replaced are not drawn.
+            var spec = (mode === 'stacked' ? STACKED_EDGES : WIDE_EDGES).filter(function (e) {
+                return isShown(e.from) && isShown(e.to);
+            });
 
             svg.textContent = '';
             labels.textContent = '';
@@ -173,9 +176,237 @@
         }
 
         build();
+        initDetail(canvas, build);
         if ('ResizeObserver' in window) new ResizeObserver(schedule).observe(canvas);
         window.addEventListener('resize', schedule);
         if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+    }
+
+
+    /* ------------------------------------------- incoming-data explanations */
+
+    var BANK_ROWS = [
+        ['Lithuania', ['Swedbank', 'SEB', 'Luminor (PDF)', 'Paysera']],
+        ['Neobanks', ['Revolut (two CSV layouts)', 'Wise', 'N26', 'bunq', 'Monzo', 'Starling']],
+        ['Germany', ['ING', 'DKB', 'Sparkasse', 'Commerzbank', 'Deutsche Bank / Postbank']],
+        ['Netherlands', ['ING', 'Rabobank']],
+        ['Belgium', ['BNP Paribas Fortis', 'KBC', 'Belfius', 'ING']],
+        ['Nordics', ['Nordea (SE, FI, DK)', 'Danske Bank (DK)']],
+        ['United Kingdom', ['Lloyds / Halifax / Bank of Scotland', 'Barclays']],
+        ['France', ['Boursorama', 'Société Générale']],
+        ['Poland', ['mBank', 'PKO Bank Polski']],
+    ];
+
+    var DETAILS = {
+        'n-broker': {
+            title: 'Brokerage statements',
+            tag: 'file upload',
+            lead: 'Drop in a broker’s statement and AskBudget reads what the account is worth and what it holds. ' +
+                'Trades, dividends and interest stay inside the brokerage account, so they never inflate spending or income.',
+            chips: ['Supported formats', ['Interactive Brokers (IBKR) Activity Statement, CSV']],
+            lists: ['What is read', [
+                'Net Asset Value, used as the account balance and checked like a bank’s closing balance',
+                'Open Positions, stored as holdings',
+                'Cash Report, with each currency’s ending cash stored as a holding too',
+            ]],
+            foot: 'Revolut’s consolidated statement also carries fund and crypto sections, and those land in Holdings as well. ' +
+                'Trading 212 has a direct connection, see its own box.',
+        },
+        'n-bank': {
+            title: 'Bank statements',
+            tag: 'file upload',
+            lead: '30 statement formats from European banks and neobanks. Export the file from your online banking, ' +
+                'drop it in, and the format is recognised from its content.',
+            rows: BANK_ROWS,
+            lists: ['What happens to a file', [
+                'CSV exports in the languages and encodings banks really use (UTF-8, Windows-1250/1252/1257); Luminor as PDF',
+                'Every new statement is checked against the balances the bank prints, and gaps are flagged',
+                'Pending and refused entries are skipped',
+                'Importing the same file twice, or overlapping files, adds nothing: rows are matched by fingerprint',
+                'Several accounts and currencies per person; amounts converted to your base currency',
+                'Transfers between your own accounts are paired and left out of income and spending; refunds are folded back into the purchase',
+                'Each row gets a merchant, a category and a flow: income, spending, savings, internal or perimeter',
+            ]],
+            foot: 'Add one under Accounts → New account → Imported account, or copy it into the inbox folder and run update. ' +
+                'Another bank? An adapter is a small file with a declared header.',
+        },
+        'n-t212': {
+            title: 'Trading 212',
+            tag: 'API keys',
+            lead: 'Connected directly with an API key and secret, no file export. One key is one account: Invest or Stocks ISA.',
+            lists: ['What is synced', [
+                'Cash and every open position, valued in the account’s own currency, into Holdings',
+                'Filled orders, dividends, deposits, withdrawals, interest and fees, into Transactions',
+                'Deposits and withdrawals are matched as transfer legs, and buys count as investments, not spending',
+                'A second sync reads the same movements again and inserts nothing new',
+            ]],
+            chips: ['Good to know', ['Read-only', 'Keys stored encrypted', 'Rate limits waited out', 'Live account']],
+            foot: 'The key never leaves your server: it is sealed with your own master key and sent only to Trading 212.',
+        },
+        'n-crypto': {
+            title: 'Binance, Coinbase, …',
+            tag: 'via CCXT',
+            lead: 'Crypto exchanges connect through CCXT, the open-source library behind most exchange integrations. ' +
+                'Add a read-only API key and the balances show up in Holdings.',
+            chips: ['Exchanges', ['Binance', 'Coinbase', 'Kraken', 'Bybit', 'OKX', 'KuCoin', 'every other exchange CCXT lists']],
+            lists: ['What is synced', [
+                'Every non-zero balance, summed per coin across spot, funding and other account types the key may see',
+                'Binance Simple Earn savings, which the standard balance call leaves out',
+                'Each coin priced in your base currency from the exchange’s own daily candle',
+            ]],
+            foot: 'Balances only, not trade history. Create the key with read permission alone.',
+        },
+        'n-ofin': {
+            title: 'Other banks',
+            tag: 'planned',
+            planned: true,
+            lead: 'Connecting banks directly through Open Finance is on the roadmap and not built yet. ' +
+                'Until then, banks like Revolut and Swedbank work through their statement exports.',
+            lists: ['Today', [
+                'Revolut, Swedbank, SEB, Luminor, Paysera and many more: export a statement and upload it',
+                'Trading 212 and crypto exchanges connect by API key',
+            ]],
+            foot: 'This arrow shows the direction, not a feature you can switch on today.',
+        },
+    };
+
+    function buildDetail(d) {
+        var frag = document.createDocumentFragment();
+
+        var head = h('div', 'detail-head');
+        head.append(h('h3', null, d.title), h('span', 'detail-tag' + (d.planned ? ' is-planned' : ''), d.tag));
+        var close = h('button', 'detail-close', '×');
+        close.type = 'button';
+        close.setAttribute('aria-label', 'Close');
+        close.dataset.close = '1';
+        head.appendChild(close);
+        frag.append(head, h('p', 'detail-lead', d.lead));
+
+        if (d.chips) frag.appendChild(chipSection(d.chips[0], d.chips[1]));
+
+        if (d.rows) {
+            var sec = h('div', 'detail-sec');
+            sec.appendChild(h('h4', null, 'Supported banks'));
+            var dl = h('dl', 'detail-rows');
+            d.rows.forEach(function (row) {
+                dl.appendChild(h('dt', null, row[0]));
+                var dd = h('dd', 'detail-chips');
+                row[1].forEach(function (name) { dd.appendChild(h('span', null, name)); });
+                dl.appendChild(dd);
+            });
+            sec.appendChild(dl);
+            frag.appendChild(sec);
+        }
+
+        if (d.lists) {
+            var ls = h('div', 'detail-sec');
+            ls.appendChild(h('h4', null, d.lists[0]));
+            var ul = h('ul', 'detail-list' + (d.lists[1].length > 5 ? ' is-wide' : ''));
+            d.lists[1].forEach(function (t) { ul.appendChild(h('li', null, t)); });
+            ls.appendChild(ul);
+            frag.appendChild(ls);
+        }
+
+        if (d.foot) frag.appendChild(h('p', 'detail-lead', d.foot));
+        return frag;
+    }
+
+    function chipSection(title, names) {
+        var sec = h('div', 'detail-sec');
+        sec.appendChild(h('h4', null, title));
+        var wrap = h('div', 'detail-chips');
+        names.forEach(function (n) { wrap.appendChild(h('span', null, n)); });
+        sec.appendChild(wrap);
+        return sec;
+    }
+
+    function h(tag, cls, text) {
+        var n = document.createElement(tag);
+        if (cls) n.className = cls;
+        if (text != null) n.textContent = text;
+        return n;
+    }
+
+    /** Hover previews an incoming node, click pins it; the right half of the diagram makes room. */
+    function initDetail(canvas, onChange) {
+        var panel = document.getElementById('flow-detail');
+        var group = document.getElementById('g-in');
+        if (!panel || !group) return;
+
+        var nodes = Array.prototype.slice.call(group.querySelectorAll('.node-info'));
+        var shown = null;
+        var pinned = null;
+        var timer = 0;
+
+        function show(id) {
+            clearTimeout(timer);
+            if (shown === id) return;
+            shown = id;
+            panel.textContent = '';
+            panel.appendChild(buildDetail(DETAILS[id]));
+            panel.scrollTop = 0;
+            // At least as tall as the incoming group; longer content grows the box instead of scrolling.
+            panel.style.minHeight = stackedQuery.matches ? '' : group.offsetHeight + 'px';
+            // Pin the group's width before the other columns go away, so it never resizes.
+            if (!canvas.classList.contains('has-detail')) canvas.style.setProperty('--g-in-w', group.offsetWidth + 'px');
+            canvas.classList.add('has-detail');
+            sync();
+        }
+
+        function hide() {
+            clearTimeout(timer);
+            if (!shown) return;
+            shown = pinned = null;
+            panel.style.minHeight = '';
+            canvas.classList.remove('has-detail');
+            canvas.style.removeProperty('--g-in-w');
+            sync();
+        }
+
+        function sync() {
+            nodes.forEach(function (n) {
+                n.classList.toggle('is-active', n.id === shown);
+                n.setAttribute('aria-pressed', String(n.id === pinned));
+            });
+            onChange();
+        }
+
+        function leaveSoon() {
+            clearTimeout(timer);
+            if (!pinned) timer = setTimeout(hide, 450);
+        }
+
+        nodes.forEach(function (n) {
+            n.addEventListener('mouseenter', function () { if (!pinned) show(n.id); });
+            n.addEventListener('focus', function () { if (!pinned) show(n.id); });
+            n.addEventListener('click', function () {
+                if (pinned === n.id) { hide(); return; }
+                pinned = n.id;
+                show(n.id);
+                sync();
+            });
+            n.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); n.click(); }
+            });
+        });
+
+        [group, panel].forEach(function (zone) {
+            zone.addEventListener('mouseenter', function () { clearTimeout(timer); });
+            zone.addEventListener('mouseleave', leaveSoon);
+        });
+        panel.addEventListener('click', function (e) {
+            if (e.target.closest('[data-close]')) hide();
+        });
+        // The pinned width goes stale on resize, so the panel closes instead.
+        window.addEventListener('resize', hide);
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') hide();
+        });
+    }
+
+    function isShown(id) {
+        var node = document.getElementById(id);
+        return !!node && node.offsetParent !== null;
     }
 
     function rectOf(id, box) {

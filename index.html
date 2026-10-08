@@ -60,16 +60,16 @@
     <div class="vignette"></div>
 </div>
 
-<div class="dev-banner" role="note">
-    <span class="pulse-dot"></span>
-    AskBudget is under active development. No stable release yet — the Docker image is an <strong>alpha</strong>.
-</div>
+<!--<div class="dev-banner" role="note">-->
+<!--    <span class="pulse-dot"></span>-->
+<!--    AskBudget is under active development. No stable release yet — the Docker image is an <strong>alpha</strong>.-->
+<!--</div>-->
 
 <header class="nav">
     <div class="container nav-inner">
         <a class="brand" href="#top" aria-label="AskBudget home">
             <img src="/favicon.svg" alt="" width="28" height="28">
-            <span>AskBudget</span>
+            <span class="brand-name"><span class="gradient-text">ask</span>budget</span>
         </a>
         <nav class="nav-links" aria-label="Primary">
             <a href="#how">How it works</a>
@@ -84,21 +84,19 @@
 
 <main id="top">
 
-    <!-- Hero -->
+    <!-- Hero: headline, then the diagram as the hero visual -->
     <section class="hero container">
         <a class="eyebrow reveal" href="#status">
             <span class="tag tag-amber">Alpha</span>
-            <span>Under active development · v0.1.0-rc.2</span>
+            <span>Under active development<span class="hide-sm"> · v0.1.0-rc.2</span></span>
             <svg class="icon"><use href="#i-arrow"/></svg>
         </a>
         <h1 class="reveal">
-            Your household’s money,<br>
-            <span class="gradient-text">understood on your own machine.</span>
+            Statements in. <span class="gradient-text">Answers out.</span>
         </h1>
         <p class="lead reveal">
-            AskBudget turns bank and brokerage statements into one trustworthy picture — dashboards,
-            a transaction table, holdings — and an MCP endpoint your AI agent can ask.
-            Self-hosted. No SaaS. No manual entry.
+            Self-hosted budgeting for households. AskBudget turns bank, brokerage and exchange data into
+            dashboards, a transaction table, holdings — and an MCP endpoint your AI agent can ask.
         </p>
         <div class="hero-cta reveal">
             <a class="btn btn-primary" href="https://demo.askbudget.app" rel="noopener">
@@ -108,17 +106,9 @@
                 <svg class="icon"><use href="#i-box"/></svg> Run the alpha with Docker
             </a>
         </div>
-        <p class="hero-note reveal">The demo runs on a fictional household. Nothing you do there leaves your browser.</p>
     </section>
 
-    <!-- Flow diagram -->
-    <section id="how" class="flow-section container">
-        <div class="section-head reveal">
-            <span class="kicker">How it works</span>
-            <h2>Statements in. Answers out.</h2>
-            <p>Every source lands in one local database. Every view — and every agent — reads the same, reconciled truth.</p>
-        </div>
-
+    <section id="how" class="flow-section container" aria-label="How AskBudget works">
         <div class="flow-canvas reveal" id="flow">
             <svg class="flow-edges" id="flow-edges" aria-hidden="true"></svg>
             <div class="flow-labels" id="flow-labels" aria-hidden="true"></div>
@@ -126,11 +116,11 @@
             <div class="flow-grid">
                 <div class="flow-group" id="g-in" data-tone="blue">
                     <div class="group-label">Incoming data</div>
-                    <div class="node" id="n-broker"><span class="node-ic"><svg><use href="#i-file"/></svg></span><span>Brokerage statements</span></div>
-                    <div class="node" id="n-bank"><span class="node-ic"><svg><use href="#i-bank"/></svg></span><span>Bank statements</span></div>
-                    <div class="node" id="n-t212"><span class="node-ic"><svg><use href="#i-key"/></svg></span><span>Trading 212</span></div>
-                    <div class="node" id="n-crypto"><span class="node-ic"><svg><use href="#i-coins"/></svg></span><span>Binance, Coinbase, …</span></div>
-                    <div class="node" id="n-ofin"><span class="node-ic"><svg><use href="#i-globe"/></svg></span><span>Other banks <small>Revolut, Swedbank</small></span></div>
+                    <div class="node node-info" id="n-broker" role="button" tabindex="0" aria-pressed="false" aria-controls="flow-detail"><span class="node-ic"><svg><use href="#i-file"/></svg></span><span>Brokerage statements</span></div>
+                    <div class="node node-info" id="n-bank" role="button" tabindex="0" aria-pressed="false" aria-controls="flow-detail"><span class="node-ic"><svg><use href="#i-bank"/></svg></span><span>Bank statements</span></div>
+                    <div class="node node-info" id="n-t212" role="button" tabindex="0" aria-pressed="false" aria-controls="flow-detail"><span class="node-ic"><svg><use href="#i-key"/></svg></span><span>Trading 212</span></div>
+                    <div class="node node-info" id="n-crypto" role="button" tabindex="0" aria-pressed="false" aria-controls="flow-detail"><span class="node-ic"><svg><use href="#i-coins"/></svg></span><span>Binance, Coinbase, …</span></div>
+                    <div class="node node-info" id="n-ofin" role="button" tabindex="0" aria-pressed="false" aria-controls="flow-detail"><span class="node-ic"><svg><use href="#i-globe"/></svg></span><span>Other banks <small>Revolut, Swedbank</small></span></div>
                 </div>
 
                 <div class="flow-center">
@@ -157,16 +147,25 @@
                     <div class="node" id="n-cc"><span class="node-ic"><svg><use href="#i-terminal"/></svg></span><span>Claude Code</span></div>
                     <div class="node" id="n-llm"><span class="node-ic"><svg><use href="#i-bot"/></svg></span><span>Other LLM agents</span></div>
                 </div>
+
+                <aside class="flow-detail" id="flow-detail" aria-live="polite"></aside>
             </div>
         </div>
+        <p class="flow-caption reveal">
+            <span><svg class="icon"><use href="#i-shield"/></svg> One local SQLite database</span>
+            <span><svg class="icon"><use href="#i-layers"/></svg> Every view reads the same reconciled data</span>
+            <span><svg class="icon"><use href="#i-plug"/></svg> Read-only, token-protected MCP</span>
+        </p>
     </section>
 
     <!-- Features -->
     <section id="features" class="container features">
-        <div class="section-head reveal">
-            <span class="kicker">Why AskBudget</span>
-            <h2>Built to tell the truth about money.</h2>
-            <p>Bank statements are raw data, not answers. Summed naively, a household looks like it earns and spends twice what it does. AskBudget works out what each transaction actually was.</p>
+        <div class="section-head section-head-split reveal">
+            <div>
+                <span class="kicker">Why AskBudget</span>
+                <h2>Built to tell the truth about money.</h2>
+            </div>
+            <p>Summed naively, bank statements make a household look like it earns and spends twice what it does. AskBudget works out what each transaction actually was.</p>
         </div>
 
         <div class="feature-grid">
